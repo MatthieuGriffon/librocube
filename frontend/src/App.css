@@ -1,0 +1,13 @@
+/* Reset de certains styles par défaut pour avoir une base propre */
+body, h1, h2, h3, h4, h5, h6, p, ol, ul, li, figure, figcaption, blockquote, dl, dd {
+  margin: 0;
+  padding: 0;
+}
+
+/* Assurer que les liens n'ont pas de soulignement par défaut */
+a {
+  text-decoration: none;
+}
+
+/* Utiliser Tailwind pour le reste des styles */
+

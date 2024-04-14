@@ -1,0 +1,18 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+.table-scroll-indicator {
+    position: relative;
+    overflow-x: auto; /* Assurez-vous que le conteneur peut défiler horizontalement */
+  }
+  
+  .table-scroll-indicator::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0; /* Positionne l'ombre à droite */
+    bottom: 0;
+    width: 40px; /* Ajustez la largeur de l'ombre selon vos besoins */
+    background: linear-gradient(to right, rgba(255, 255, 255, 0.137), rgba(0, 0, 0, 0.041));
+    /* Assurez-vous que le gradient commence transparent et devient plus sombre à la fin */
+  }

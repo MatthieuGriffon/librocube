@@ -1,0 +1,45 @@
+# Dépendances
+node_modules/
+
+# Dossiers de build/compilation
+/build
+/dist
+/out
+
+# Environnements
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE et éditeurs de texte
+.vscode/
+.idea/
+*.sublime-workspace
+
+# Système d'exploitation
+.DS_Store
+Thumbs.db
+
+# Docker
+docker-compose.yml
+*.dockerignore
+Dockerfile*
+**/.dockerenv
+**/.dockerignore
+
+# Volumes Docker
+**/data/*
+**/db/*
+!**/data/.gitkeep
+!**/db/.gitkeep
+
+# Autres fichiers générés par Docker
+**/*_tmp
+**/*_temp
+**/*_cache
+
+# Autres
+npm-debug.log
+yarn-error.log
