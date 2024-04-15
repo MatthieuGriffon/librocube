@@ -1,8 +1,9 @@
 import { pool } from '../db.js'; 
 
-export const getBooksByUserId = async (userID) => {
+export const getBooksByUserId = async (userId) => {
   try {
-    const result = await pool.query('SELECT * FROM livres WHERE user_id = $1', [userID]);
+    console.log("Queried database for user:", userId);
+    const result = await pool.query('SELECT * FROM livres WHERE user_id = $1', [userId]);
     return result.rows; 
   } catch (err) {
     console.error('Erreur lors de la récupération des livres pour l\'utilisateur:', err);
@@ -48,11 +49,13 @@ export const deleteBookFromDB = async (bookId, userId) => {
 
 export const getBookDetailsById = async (bookId, userId) => {
   try {
+    console.log(`Fetching book details for bookId: ${bookId} and userId: ${userId}`);
     const result = await pool.query(
       'SELECT * FROM livres WHERE id = $1 AND user_id = $2',
       [bookId, userId]
     );
-      return result.rows[0];
+    console.log(`Query result: `, result.rows);
+    return result.rows[0];
   } catch (err) {
     console.error('Erreur lors de la récupération des détails du livre:', err);
     throw err;

@@ -2,8 +2,9 @@ import { createContext, useState, ReactNode, FC } from "react";
 
 export interface AuthContextType {
   isAuthenticated: boolean;
-  login: (token: string) => void;
+  login: (token: string, userId: string) => void;
   logout: () => void;
+  userId: string;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -13,22 +14,33 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(
+    !!localStorage.getItem("token")
+  );
+  const [userId, setUserId] = useState<string>(
+    localStorage.getItem("userId") || ""
+  );
 
-  const login = (token: string) => {
-    setIsAuthenticated(true);
+  const login = (token: string, userId: string) => {
     localStorage.setItem("token", token);
+    localStorage.setItem("userId", userId);
+    console.log("Stored userId:", localStorage.getItem("userId")); // Vérifiez si l'userId est correctement stocké
+    setIsAuthenticated(true);
+    setUserId(userId);
+    console.log("Login successful with userID:", userId); // Ajoutez cette ligne pour le débogage
   };
+
   const logout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("userId");
     setIsAuthenticated(false);
-    localStorage.removeItem("token"); // Enlever le token de localStorage
+    setUserId("");
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, userId, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
 };
-
 export default AuthContext;

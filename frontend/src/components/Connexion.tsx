@@ -44,10 +44,13 @@ const Connexion: React.FC = () => {
         return response.json();
       })
       .then((data) => {
-        console.log("Authentification réussie:", data);
+        console.log("Received data on login:", data);
+        if (!data.userId) {
+          throw new Error("UserId missing in the response");
+        }
         localStorage.setItem("token", data.token);
-        localStorage.setItem("userId", data.userId); // Stockage de l'userID
-        login(data.token);
+        localStorage.setItem("userId", data.userId);
+        login(data.token, data.userId);
         navigate("/books");
       })
       .catch((error) => {
@@ -89,10 +92,13 @@ const Connexion: React.FC = () => {
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log("Utilisateur bien inscrit dans la base de donnée:", data);
-        localStorage.setItem("token", data.token); // Assurez-vous que cette ligne fonctionne correctement
+        console.log("Received data on login:", data);
+        if (!data.userId) {
+          throw new Error("UserId missing in the response");
+        }
+        localStorage.setItem("token", data.token);
         localStorage.setItem("userId", data.userId);
-        login(data.token);
+        login(data.token, data.userId);
         navigate("/books");
       })
       .catch((error) => {

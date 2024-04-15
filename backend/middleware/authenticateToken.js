@@ -16,6 +16,7 @@ export const authenticateToken = (req, res, next) => {
             return res.sendStatus(403);
         }
         req.userId = user.userId;
+        console.log("UserID extrait du token du middlewate authenticate Token:", req.userId);
         next();
     });
 };  

@@ -15,7 +15,7 @@ app.use(cors({
 
 //Utilisation des Routes
 app.use('/users', userRoutes)
-app.use('/books', bookRoutes)
+app.use('/api', bookRoutes); 
 app.use('/genres', genreRoutes)
 
 

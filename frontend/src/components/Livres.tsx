@@ -1,79 +1,79 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../utils/useAuth";
 
-const Livres: React.FC = () => {
-  const { isAuthenticated } = useAuth();
-  const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
-  console.log("Authentifié:", isAuthenticated);
+export interface Book {
+  id: string;
+  titre: string;
+  auteur: string;
+  genre: string;
+  note: string;
+  commentaire: string;
+  dateEmprunt: string;
+  date_lecture: string;
+  date_achat: string;
+}
 
-  // eslint-disable-next-line react-hooks/rules-of-hooks, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
-  const [livres] = useState<any[]>([
-    {
-      titre: "Les Ombres du Passé",
-      auteur: "Julien Mercier",
-      genre: "Fiction",
-      status: "Lu",
-      dateEmprunt: "2020-01-01",
-      dateLecture: "2020-02-01",
-      commentaire: "Intrigue captivante du début à la fin.",
-      note: "⭐⭐⭐⭐⭐",
-    },
-    {
-      titre: "Au-delà des Étoiles",
-      auteur: "Clara Fontaine",
-      genre: "Science",
-      status: "Non Lu",
-      dateEmprunt: "2021-01-01",
-      dateLecture: "",
-      commentaire: "Hâte de le commencer, recommandé par un ami.",
-      note: "⭐⭐⭐",
-    },
-    {
-      titre: "Héritage d'un Empire",
-      auteur: "Marc Dubois",
-      genre: "Histoire",
-      status: "Lu",
-      dateEmprunt: "2020-03-15",
-      dateLecture: "2020-04-10",
-      commentaire:
-        "Une perspective fascinante sur des événements historiques clés.",
-      note: "⭐⭐⭐⭐",
-    },
-    {
-      titre: "Voix Silencieuses",
-      auteur: "Sophie Laurent",
-      genre: "Biographie",
-      status: "En cours",
-      dateEmprunt: "2021-05-21",
-      dateLecture: "2021-06-01",
-      commentaire:
-        "Inspiration pure. La vie de cette personnalité est incroyable.",
-      note: "⭐⭐⭐⭐⭐",
-    },
-    {
-      titre: "Le Gardien des Secrets",
-      auteur: "Émilie Rivière",
-      genre: "Fantasy",
-      status: "Lu",
-      dateEmprunt: "2019-12-25",
-      dateLecture: "2020-01-20",
-      commentaire:
-        "Un monde riche et immersif. Un peu long à certains moments.",
-      note: "⭐⭐⭐⭐",
-    },
-  ]);
+const formatDate = (dateString: string): string => {
+  const options: Intl.DateTimeFormatOptions = {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  };
+  return new Date(dateString).toLocaleDateString("fr-FR", options);
+};
+
+const Livres: React.FC = () => {
+  const { isAuthenticated, userId } = useAuth(); // Assurez-vous que `userId` est disponible via `useAuth`
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState<boolean>(true);
+  const [livres, setLivres] = useState<Book[]>([]);
+  const token = localStorage.getItem("token");
+  console.log("Current userId from context:", userId);
+
+  const fetchLivres = useCallback(() => {
+    console.log("Fetching books with token:", token, "and userId:", userId);
+    if (token && userId) {
+      console.log(`URL: http://localhost:3000/users/${userId}/books`); // Ajoute ceci pour vérifier l'URL formée
+      fetch(`http://localhost:3000/api/user/${userId}/books`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Failed to fetch books");
+          }
+          return response.json();
+        })
+        .then((data) => {
+          setLivres(data);
+          setLoading(false);
+        })
+        .catch((error) => {
+          console.error("Erreur lors de la récupération des livres:", error);
+          console.error("Response status:", error.response?.status);
+          console.error("Response error:", error.response?.data);
+        });
+    } else {
+      console.log("Token or userId missing");
+    }
+  }, [token, userId]);
+
   useEffect(() => {
     if (!isAuthenticated) {
       navigate("/login");
     } else {
-      setLoading(false);
+      fetchLivres();
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, fetchLivres]);
+
   if (loading) {
-    return null;
+    return <div>Loading...</div>;
   }
+
   return (
     <div className="flex max-w-6xl mx-auto flex-col">
       <h2 className="text-1xl font-bold mb-2 text-center p-2 md:text-2xl">
@@ -89,7 +89,6 @@ const Livres: React.FC = () => {
               <th className="px-1 py-1 text-xs md:text-base">Note</th>
               <th className="px-1 py-1 text-xs md:text-base">Commentaires</th>
               <th className="px-1 py-1 text-xs md:text-base">Emprunté</th>
-              <th className="px-1 py-1 text-xs md:text-base">Status</th>
               <th className="px-1 py-1 text-xs md:text-base">Lu le</th>
             </tr>
           </thead>
@@ -105,23 +104,15 @@ const Livres: React.FC = () => {
                 <td className="px-1 py-1 text-xs md:text-base">
                   {livre.genre}
                 </td>
-                <td className="px-1 py-1 text-xs md:text-base">
-                  {/* Ici tu peux mettre une représentation visuelle des étoiles */}
-                  ⭐ ⭐
-                </td>
+                <td className="px-1 py-1 text-xs md:text-base">{livre.note}</td>
                 <td className="px-1 py-1 text-xs md:text-base">
                   {livre.commentaire}
                 </td>
                 <td className="px-1 py-1 text-xs md:text-base">
-                  {livre.dateEmprunt}
+                  {formatDate(livre.date_achat)}
                 </td>
-
                 <td className="px-1 py-1 text-xs md:text-base">
-                  {livre.status}
-                </td>
-
-                <td className="px-1 py-1 text-xs md:text-base">
-                  {livre.dateLecture}
+                  {formatDate(livre.date_lecture)}
                 </td>
               </tr>
             ))}

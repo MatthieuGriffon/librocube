@@ -10,14 +10,17 @@ import {
 
 export const fetchUserBooks = async (req, res) => {
     try {
-        console.log("UserID reçu dans la requête:", req.params.userId);
-         const userID = req.params.userId;
-         const books = await getBooksByUserId(userID);
+        console.log("UserID reçu dans la requête coter :", req.params.userId);
+         const userId = req.params.userId;
+         console.log("UserID extrait du token du bookController de la fetchUserBooks:", userId);
+         const books = await getBooksByUserId(userId);
         console.log("Livres récupérés pour l'utilisateur:", books);
          res.json(books);
        
     } catch (error) {
+        console.log("UserID extrait du token:", userId);
         console.error("Erreur lors de la récupération des livres:", error);
+        
          res.status(500).json ({ error : "Erreur lors de la récupération des livres"}) 
     }
 }
@@ -88,9 +91,10 @@ export const deleteBook = async (req, res) => {
 };
 
 export const getBookDetails = async (req, res) => {
-    const { bookId } = req.params;
+    const bookId = req.params.bookId;  // Assurez-vous que c'est bien récupéré
     const userId = req.userId;
 
+    console.log("Controller: Fetching details for bookId:", bookId, "with userId:", userId);
     try {
         const book = await getBookDetailsById(bookId, userId);
         if (book) {
@@ -98,13 +102,11 @@ export const getBookDetails = async (req, res) => {
         } else {
             res.status(404).json({ message: "Livre non trouvé."});
         }
-
     } catch (error) {
         console.error("Erreur lors de la récupération des détails du livre:", error);
         res.status(500).json({ message: "Erreur lors de la récupération des détails du livre."})
     }
-
-}
+};
 
 export const listGenres = async (req, res) => {
     try {

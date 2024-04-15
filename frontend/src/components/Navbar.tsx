@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import logoPath from "../assets/logo_trans_librocube.png";
 import { useAuth } from "../utils/useAuth";
 import {
@@ -11,6 +11,12 @@ import {
 
 const NavBar: React.FC = () => {
   const { isAuthenticated, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
 
   return (
     <nav className="bg-teal-500 flex flex-col md:flex-row lg:flex-row items-center justify-between p-4 lg:p-6 w-full">
@@ -56,7 +62,7 @@ const NavBar: React.FC = () => {
               <FaUserCircle size="1.5em" />
             </Link>
             <button
-              onClick={logout}
+              onClick={handleLogout}
               title="Déconnexion"
               className="inline-flex items-center justify-center p-2 rounded-md text-teal-200 hover:text-white hover:bg-teal-600"
             >
