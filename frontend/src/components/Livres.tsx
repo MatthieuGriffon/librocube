@@ -24,7 +24,7 @@ const formatDate = (dateString: string): string => {
 };
 
 const Livres: React.FC = () => {
-  const { isAuthenticated, userId } = useAuth(); // Assurez-vous que `userId` est disponible via `useAuth`
+  const { isAuthenticated, userId } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState<boolean>(true);
   const [livres, setLivres] = useState<Book[]>([]);
