@@ -120,7 +120,7 @@ LibroCube uses PostgreSQL as a relational database management system. UUIDs are 
 
 
 
-### UUsage
+### Usage
 
 - **Start the backend server** cd bakcend/npm run dev
 - **Start the frontend application** cd frontend/npm run dev
