@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../utils/useAuth";
+import ModalLivres from "./ModalLivres";
 
 export interface Book {
   id: string;
@@ -30,6 +31,69 @@ const Livres: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [livres, setLivres] = useState<Book[]>([]);
   const token = localStorage.getItem("token");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedBook, setSelectedBook] = useState<Book | null>(null);
+
+  const openModal = (book: Book) => {
+    setSelectedBook(book);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedBook(null);
+  };
+
+  const onSave = (bookData: Book) => {
+    // Envoyer la requête de mise à jour
+    fetch(`http://localhost:3000/api/${bookData.id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`, // Assurez-vous que le token est correctement géré
+      },
+      body: JSON.stringify(bookData),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.livre) {
+          // Mise à jour de l'état local pour refléter les changements
+          const updatedBooks = livres.map((book) => {
+            if (book.id === data.livre.id) {
+              return { ...book, ...data.livre };
+            }
+            return book;
+          });
+          setLivres(updatedBooks);
+          closeModal();
+        } else {
+          throw new Error(data.message || "Mise à jour échouée");
+        }
+      })
+      .catch((error) => {
+        console.error("Erreur lors de la mise à jour du livre:", error);
+      });
+  };
+
+  const handleBookUpdate = (updatedBook: { id: string }) => {
+    console.log("Updating book with:", updatedBook);
+    const updatedBooks = livres.map((book) => {
+      if (book.id === updatedBook.id) {
+        console.log("Old book data:", book);
+        console.log("New book data:", { ...book, ...updatedBook });
+        return { ...book, ...updatedBook };
+      }
+      return book;
+    });
+    setLivres(updatedBooks);
+    console.log("Updated books list:", updatedBooks);
+  };
+
+  const onDelete = (bookId: string) => {
+    // Logique pour supprimer le livre du serveur
+    console.log("Deleting book", bookId);
+  };
+
   console.log("Current userId from context:", userId);
 
   const fetchLivres = useCallback(() => {
@@ -83,18 +147,22 @@ const Livres: React.FC = () => {
         <table className="min-w-full">
           <thead className="bg-gray-200 text-sm">
             <tr className="text-center">
+              <th className="px-1 py-1 text-xs md:text-base">Action</th>
               <th className="px-1 py-1 text-xs md:text-base">Titre</th>
               <th className="px-1 py-1 text-xs md:text-base">Auteur</th>
               <th className="px-1 py-1 text-xs md:text-base">Genre</th>
               <th className="px-1 py-1 text-xs md:text-base">Note</th>
               <th className="px-1 py-1 text-xs md:text-base">Commentaires</th>
-              <th className="px-1 py-1 text-xs md:text-base">Emprunté</th>
+              <th className="px-1 py-1 text-xs md:text-base">Achat/Emprunt</th>
               <th className="px-1 py-1 text-xs md:text-base">Lu le</th>
             </tr>
           </thead>
           <tbody>
             {livres.map((livre, index) => (
               <tr key={index} className="border-b text-center md:text-base">
+                <td className="px-1 py-1 text-xs md:text-base">
+                  <button onClick={() => openModal(livre)}>Éditer</button>
+                </td>
                 <td className="px-1 py-1 text-xs md:text-base">
                   {livre.titre}
                 </td>
@@ -118,6 +186,16 @@ const Livres: React.FC = () => {
             ))}
           </tbody>
         </table>
+        {isModalOpen && selectedBook && (
+          <ModalLivres
+            isOpen={isModalOpen}
+            book={selectedBook}
+            closeModal={closeModal}
+            onSave={onSave}
+            onUpdate={handleBookUpdate} // Assurez-vous de passer cette fonction
+            onDelete={onDelete}
+          />
+        )}
       </div>
     </div>
   );

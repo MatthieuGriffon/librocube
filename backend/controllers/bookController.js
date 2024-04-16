@@ -39,8 +39,8 @@ export const createBook = async (req, res) => {
 
 export const updateBook = async (req, res) => {
     const { bookId } = req.params;
-    const userId = req.userId; // Assure-toi que userId est bien extrait de l'authentification ou de la session
-    const { titre, auteur, dateAchat, dateLecture, commentaire, note } = req.body;
+    const userId = req.userId; 
+    const { titre, auteur, dateAchat, dateLecture, commentaire, note, genre_id } = req.body;
   
     try {
       // Vérification de l'existence du livre pour cet utilisateur
@@ -52,7 +52,7 @@ export const updateBook = async (req, res) => {
       }
   
       // Mise à jour du livre si l'utilisateur en est bien le propriétaire
-      const updatedBook = await updateBookInDB(bookId, titre, auteur, dateAchat, dateLecture, commentaire, note, userId);
+      const updatedBook = await updateBookInDB(bookId, titre, auteur, dateAchat, dateLecture, commentaire, note, userId, genre_id);
       if (updatedBook) {
         console.log("Livre mis à jour avec succès:", updatedBook);
         res.status(200).json({ message: "Livre mis à jour avec succès", livre: updatedBook });

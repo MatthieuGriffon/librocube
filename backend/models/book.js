@@ -38,11 +38,24 @@ export const checkBookOwnership = async (bookId, userId) => {
   }
 }
 
-export const updateBookInDB = async (bookId, titre, auteur, dateAchat, dateLecture, commentaire, note, userId) => {
-  const result = await pool.query(
-    'UPDATE livres SET titre = $1, auteur = $2, date_achat = $3, date_lecture = $4, commentaire = $5, note = $6 WHERE id = $7 AND user_id = $8 RETURNING *',
-    [titre, auteur, dateAchat, dateLecture, commentaire, note, bookId, userId]
+export const updateBookInDB = async (bookId, titre, auteur, dateAchat, dateLecture, commentaire, note, userId, genre_id) => {
+  // Mise à jour du livre
+  await pool.query(
+    `UPDATE livres SET
+      titre = $1, auteur = $2, date_achat = $3, date_lecture = $4, commentaire = $5, note = $6, genre_id = $9
+    WHERE id = $7 AND user_id = $8`,
+    [titre, auteur, dateAchat, dateLecture, commentaire, note, bookId, userId, genre_id]
   );
+
+  // Récupérer le livre mis à jour avec le genre
+  const result = await pool.query(
+    `SELECT livres.*, genres.nom as genre_nom
+    FROM livres
+    JOIN genres ON genres.id = livres.genre_id
+    WHERE livres.id = $1`,
+    [bookId]
+  );
+
   return result.rows[0];
 }
 
