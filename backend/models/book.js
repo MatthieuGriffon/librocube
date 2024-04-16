@@ -2,20 +2,26 @@ import { pool } from '../db.js';
 
 export const getBooksByUserId = async (userId) => {
   try {
-    console.log("Queried database for user:", userId);
-    const result = await pool.query('SELECT * FROM livres WHERE user_id = $1', [userId]);
-    return result.rows; 
+    const result = await pool.query(`
+      SELECT livres.id, livres.titre, livres.auteur, livres.date_achat, livres.date_lecture, 
+             livres.commentaire, livres.note, livres.user_id, genres.nom AS genre_nom
+      FROM livres
+      LEFT JOIN genres ON livres.genre_id = genres.id
+      WHERE livres.user_id = $1
+    `, [userId]);
+    return result.rows;
   } catch (err) {
     console.error('Erreur lors de la récupération des livres pour l\'utilisateur:', err);
     throw err;
   }
 }
 
-export const addBook = async (titre, auteur, dateAchat, dateLecture, commentaire, note, userId) => {
-  const result = await pool.query (
-    'INSERT INTO livres (titre, auteur, date_achat, date_lecture, commentaire, note, user_id) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
-    [titre, auteur, dateAchat, dateLecture, commentaire, note, userId]
+export const addBook = async (titre, auteur, dateAchat, dateLecture, commentaire, note, userId, genre_id) => {
+  const result = await pool.query(
+    'INSERT INTO livres (titre, auteur, date_achat, date_lecture, commentaire, note, user_id, genre_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
+    [titre, auteur, dateAchat, dateLecture, commentaire, note, userId, genre_id]
   );
+  console.log(titre, auteur, genre_id, dateAchat, dateLecture, commentaire, note, userId);
   return result.rows[0];
 };
 

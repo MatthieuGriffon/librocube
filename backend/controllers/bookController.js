@@ -26,10 +26,10 @@ export const fetchUserBooks = async (req, res) => {
 }
 
 export const createBook = async (req, res) => {
-    const { titre, auteur, dateAchat, dateLecture, commentaire, note } = req.body;
+    const { titre, auteur, dateAchat, dateLecture, commentaire, note, genre_id } = req.body;
     const userId = req.userId;
     try {
-        const newBook= await addBook (titre, auteur, dateAchat, dateLecture, commentaire, note, userId);
+        const newBook= await addBook (titre, auteur, dateAchat, dateLecture, commentaire, note, userId, genre_id);
         res.status(201).json ({ message :"Livre ajouté avec succès", livre: newBook});
     } catch (error) {
         console.error("Erreur lors de l'ajout du Livre:", error);

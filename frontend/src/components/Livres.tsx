@@ -6,7 +6,8 @@ export interface Book {
   id: string;
   titre: string;
   auteur: string;
-  genre: string;
+  genre_id: string;
+  genre_nom: string;
   note: string;
   commentaire: string;
   dateEmprunt: string;
@@ -34,7 +35,6 @@ const Livres: React.FC = () => {
   const fetchLivres = useCallback(() => {
     console.log("Fetching books with token:", token, "and userId:", userId);
     if (token && userId) {
-      console.log(`URL: http://localhost:3000/users/${userId}/books`); // Ajoute ceci pour vérifier l'URL formée
       fetch(`http://localhost:3000/api/user/${userId}/books`, {
         method: "GET",
         headers: {
@@ -102,7 +102,7 @@ const Livres: React.FC = () => {
                   {livre.auteur}
                 </td>
                 <td className="px-1 py-1 text-xs md:text-base">
-                  {livre.genre}
+                  {livre.genre_nom}
                 </td>
                 <td className="px-1 py-1 text-xs md:text-base">{livre.note}</td>
                 <td className="px-1 py-1 text-xs md:text-base">
