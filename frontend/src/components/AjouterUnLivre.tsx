@@ -11,8 +11,8 @@ interface FormState {
   titre: string;
   auteur: string;
   genre_id: string;
-  dateAchat: string;
-  dateLecture: string;
+  date_achat: string;
+  date_lecture: string;
   commentaire: string;
   note: number;
 }
@@ -26,8 +26,8 @@ const AjouterUnLivre: React.FC = () => {
     titre: "",
     auteur: "",
     genre_id: "",
-    dateAchat: "",
-    dateLecture: "",
+    date_achat: "",
+    date_lecture: "",
     commentaire: "",
     note: 0,
   });
@@ -170,16 +170,16 @@ const AjouterUnLivre: React.FC = () => {
           <div className="mb-4">
             <label
               className="block text-gray-700 text-sm font-bold mb-2"
-              htmlFor="dateAchat"
+              htmlFor="date_achat"
             >
               Date d'achat
             </label>
             <input
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              id="dateAchat"
-              name="dateAchat"
+              id="date_achat"
+              name="date_achat"
               type="date"
-              value={formData.dateAchat}
+              value={formData.date_achat}
               onChange={handleInputChange}
             />
           </div>
@@ -188,16 +188,16 @@ const AjouterUnLivre: React.FC = () => {
           <div className="mb-4">
             <label
               className="block text-gray-700 text-sm font-bold mb-2"
-              htmlFor="dateLecture"
+              htmlFor="date_lecture"
             >
               Date de lecture
             </label>
             <input
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              id="dateLecture"
-              name="dateLecture"
+              id="date_lecture"
+              name="date_lecture"
               type="date"
-              value={formData.dateLecture}
+              value={formData.date_lecture}
               onChange={handleInputChange}
             />
           </div>

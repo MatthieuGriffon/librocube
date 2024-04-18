@@ -11,18 +11,19 @@ export interface Book {
   genre_nom: string;
   note: string;
   commentaire: string;
-  dateEmprunt: string;
   date_lecture: string;
   date_achat: string;
 }
 
-const formatDate = (dateString: string): string => {
-  const options: Intl.DateTimeFormatOptions = {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  };
-  return new Date(dateString).toLocaleDateString("fr-FR", options);
+const formatDateForInput = (dateString: string | number | Date) => {
+  console.log("Received date string:", dateString);
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  const timeZoneOffset = date.getTimezoneOffset() * 60000;
+  const localDate = new Date(date.getTime() - timeZoneOffset);
+  const formattedDate = localDate.toISOString().split("T")[0];
+  console.log("Formatted date:", formattedDate);
+  return formattedDate;
 };
 
 const Livres: React.FC = () => {
@@ -57,7 +58,6 @@ const Livres: React.FC = () => {
       .then((response) => response.json())
       .then((data) => {
         if (data.livre) {
-          // Mise à jour de l'état local pour refléter les changements
           const updatedBooks = livres.map((book) => {
             if (book.id === data.livre.id) {
               return { ...book, ...data.livre };
@@ -113,6 +113,8 @@ const Livres: React.FC = () => {
           return response.json();
         })
         .then((data) => {
+          console.log("Books fetched:", data); // Vérifier le format des dates ici
+
           setLivres(data);
           setLoading(false);
         })
@@ -177,10 +179,10 @@ const Livres: React.FC = () => {
                   {livre.commentaire}
                 </td>
                 <td className="px-1 py-1 text-xs md:text-base">
-                  {formatDate(livre.date_achat)}
+                  {formatDateForInput(livre.date_achat)}
                 </td>
                 <td className="px-1 py-1 text-xs md:text-base">
-                  {formatDate(livre.date_lecture)}
+                  {formatDateForInput(livre.date_lecture)}
                 </td>
               </tr>
             ))}

@@ -26,10 +26,10 @@ export const fetchUserBooks = async (req, res) => {
 }
 
 export const createBook = async (req, res) => {
-    const { titre, auteur, dateAchat, dateLecture, commentaire, note, genre_id } = req.body;
+    const { titre, auteur, date_achat, date_lecture, commentaire, note, genre_id } = req.body;
     const userId = req.userId;
     try {
-        const newBook= await addBook (titre, auteur, dateAchat, dateLecture, commentaire, note, userId, genre_id);
+        const newBook= await addBook (titre, auteur, date_achat, date_lecture, commentaire, note, userId, genre_id);
         res.status(201).json ({ message :"Livre ajouté avec succès", livre: newBook});
     } catch (error) {
         console.error("Erreur lors de l'ajout du Livre:", error);
@@ -40,7 +40,7 @@ export const createBook = async (req, res) => {
 export const updateBook = async (req, res) => {
     const { bookId } = req.params;
     const userId = req.userId; 
-    const { titre, auteur, dateAchat, dateLecture, commentaire, note, genre_id } = req.body;
+    const { titre, auteur, date_achat, date_lecture, commentaire, note, genre_id } = req.body;
   
     try {
       // Vérification de l'existence du livre pour cet utilisateur
@@ -52,7 +52,8 @@ export const updateBook = async (req, res) => {
       }
   
       // Mise à jour du livre si l'utilisateur en est bien le propriétaire
-      const updatedBook = await updateBookInDB(bookId, titre, auteur, dateAchat, dateLecture, commentaire, note, userId, genre_id);
+      const updatedBook = await updateBookInDB(bookId, titre, auteur, date_achat, date_lecture, commentaire, note, userId, genre_id);
+      console.log ("updatedBook du BookController", updatedBook);
       if (updatedBook) {
         console.log("Livre mis à jour avec succès:", updatedBook);
         res.status(200).json({ message: "Livre mis à jour avec succès", livre: updatedBook });

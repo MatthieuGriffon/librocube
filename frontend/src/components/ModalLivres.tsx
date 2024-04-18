@@ -8,7 +8,6 @@ export interface Book {
   genre_nom: string;
   note: string;
   commentaire: string;
-  dateEmprunt: string;
   date_lecture: string;
   date_achat: string;
 }
@@ -27,11 +26,6 @@ export interface Genre {
   nom: string;
 }
 
-// Fonction pour formater la date pour les inputs de type date
-const formatDateForInput = (dateString: string): string => {
-  return new Date(dateString).toISOString().split("T")[0];
-};
-
 const ModalLivres: React.FC<ModalProps> = ({
   isOpen,
   book,
@@ -44,12 +38,21 @@ const ModalLivres: React.FC<ModalProps> = ({
   const token = localStorage.getItem("token");
   console.log("Received onUpdate function:", onUpdate);
 
+  const formatDateForInput = (dateString: string | number | Date) => {
+    console.log(
+      "dateString du formatDateForInput de ModalLivres.tsx",
+      dateString
+    );
+    if (!dateString) return ""; // Retourne une chaîne vide pour une input de type date si aucune date n'est fournie
+    const date = new Date(dateString);
+    return date.toISOString().split("T")[0]; // Assure que la date est au format YYYY-MM-DD
+  };
   // Mettre à jour formData à l'ouverture de la modal ou lorsque le livre change
   useEffect(() => {
     if (isOpen && book) {
       setFormData({
         ...book,
-        date_achat: formatDateForInput(book.date_achat), // Format correct pour les inputs de type date
+        date_achat: formatDateForInput(book.date_achat),
         date_lecture: formatDateForInput(book.date_lecture),
       });
     }
@@ -100,11 +103,13 @@ const ModalLivres: React.FC<ModalProps> = ({
     if (response.ok) {
       const updatedBookData = await response.json();
       onUpdate(updatedBookData.livre);
+      console.log("Data sent to server:", formData);
       closeModal();
     } else {
       console.error("Failed to update the book");
     }
   };
+
   const handleDelete = () => onDelete(book.id);
 
   if (!isOpen) return null;
@@ -114,10 +119,14 @@ const ModalLivres: React.FC<ModalProps> = ({
       <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-xl">
         <h2 className="text-xl font-bold mb-4">Éditer le livre</h2>
         <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2">
+          <label
+            htmlFor="titre"
+            className="block text-gray-700 text-sm font-bold mb-2"
+          >
             Titre
           </label>
           <input
+            id="titre"
             name="titre"
             type="text"
             value={formData.titre}
@@ -125,11 +134,16 @@ const ModalLivres: React.FC<ModalProps> = ({
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
           />
         </div>
+
         <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2">
+          <label
+            htmlFor="auteur"
+            className="block text-gray-700 text-sm font-bold mb-2"
+          >
             Auteur
           </label>
           <input
+            id="auteur"
             name="auteur"
             type="text"
             value={formData.auteur}
@@ -137,11 +151,16 @@ const ModalLivres: React.FC<ModalProps> = ({
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
           />
         </div>
+
         <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2">
+          <label
+            htmlFor="genre_id"
+            className="block text-gray-700 text-sm font-bold mb-2"
+          >
             Genre
           </label>
           <select
+            id="genre_id"
             name="genre_id"
             value={formData.genre_id}
             onChange={handleInputChange}
@@ -155,11 +174,16 @@ const ModalLivres: React.FC<ModalProps> = ({
             ))}
           </select>
         </div>
+
         <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2">
+          <label
+            htmlFor="note"
+            className="block text-gray-700 text-sm font-bold mb-2"
+          >
             Note
           </label>
           <input
+            id="note"
             name="note"
             type="text"
             value={formData.note}
@@ -167,11 +191,16 @@ const ModalLivres: React.FC<ModalProps> = ({
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
           />
         </div>
+
         <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2">
+          <label
+            htmlFor="commentaire"
+            className="block text-gray-700 text-sm font-bold mb-2"
+          >
             Commentaire
           </label>
           <input
+            id="commentaire"
             name="commentaire"
             type="text"
             value={formData.commentaire}
@@ -179,11 +208,16 @@ const ModalLivres: React.FC<ModalProps> = ({
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
           />
         </div>
+
         <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2">
+          <label
+            htmlFor="date_achat"
+            className="block text-gray-700 text-sm font-bold mb-2"
+          >
             Emprunté le
           </label>
           <input
+            id="date_achat"
             key={`date-achat-${formData.id}`}
             name="date_achat"
             type="date"
@@ -192,10 +226,14 @@ const ModalLivres: React.FC<ModalProps> = ({
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
           />
           <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2">
+            <label
+              htmlFor="date_lecture"
+              className="block text-gray-700 text-sm font-bold mb-2"
+            >
               Lu le
             </label>
             <input
+              id="date_lecture"
               key={`date-lecture-${formData.id}`}
               name="date_lecture"
               type="date"
