@@ -15,15 +15,17 @@ export interface Book {
   date_achat: string;
 }
 
+export interface Genre {
+  id: string;
+  nom: string;
+}
+
 const formatDateForInput = (dateString: string | number | Date) => {
-  console.log("Received date string:", dateString);
   if (!dateString) return "";
   const date = new Date(dateString);
   const timeZoneOffset = date.getTimezoneOffset() * 60000;
   const localDate = new Date(date.getTime() - timeZoneOffset);
-  const formattedDate = localDate.toISOString().split("T")[0];
-  console.log("Formatted date:", formattedDate);
-  return formattedDate;
+  return localDate.toISOString().split("T")[0];
 };
 
 const Livres: React.FC = () => {
@@ -31,11 +33,26 @@ const Livres: React.FC = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState<boolean>(true);
   const [livres, setLivres] = useState<Book[]>([]);
+  const [genres, setGenres] = useState<Genre[]>([]);
   const token = localStorage.getItem("token");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
 
+  useEffect(() => {
+    console.log(
+      "Books loaded with genres_id:",
+      livres.map((livre) => livre.genre_id)
+    );
+  }, [livres]);
+
   const openModal = (book: Book) => {
+    console.log("Opening modal with book:", book);
+    console.log("Genre ID of the book:", book.genre_id);
+    if (!book.genre_id) {
+      console.error("This book does not have a valid genre ID.");
+      // Afficher une erreur ou prendre une mesure corrective ici
+      return;
+    }
     setSelectedBook(book);
     setIsModalOpen(true);
   };
@@ -44,9 +61,29 @@ const Livres: React.FC = () => {
     setIsModalOpen(false);
     setSelectedBook(null);
   };
+  useEffect(() => {
+    const fetchGenres = async () => {
+      if (token) {
+        const response = await fetch("http://localhost:3000/genres", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (response.ok) {
+          const genresData = await response.json();
+          setGenres(genresData);
+        } else {
+          throw new Error("Failed to fetch genres");
+        }
+      }
+    };
+
+    fetchGenres();
+  }, [token]);
 
   const onSave = (bookData: Book) => {
-    // Envoyer la requête de mise à jour
     fetch(`http://localhost:3000/api/${bookData.id}`, {
       method: "PUT",
       headers: {
@@ -113,15 +150,18 @@ const Livres: React.FC = () => {
           return response.json();
         })
         .then((data) => {
-          console.log("Books fetched:", data); // Vérifier le format des dates ici
+          console.log("Books  :", data);
+          const booksWithGenre = data.map((book: { genre_id: unknown }) => ({
+            ...book,
 
-          setLivres(data);
+            genre_id: book.genre_id || "fallback-genre-id",
+          }));
+          console.log("Books with genre in fetchLivre:", booksWithGenre);
+          setLivres(booksWithGenre);
           setLoading(false);
         })
         .catch((error) => {
           console.error("Erreur lors de la récupération des livres:", error);
-          console.error("Response status:", error.response?.status);
-          console.error("Response error:", error.response?.data);
         });
     } else {
       console.log("Token or userId missing");
@@ -192,6 +232,7 @@ const Livres: React.FC = () => {
           <ModalLivres
             isOpen={isModalOpen}
             book={selectedBook}
+            genres={genres}
             closeModal={closeModal}
             onSave={onSave}
             onUpdate={handleBookUpdate} // Assurez-vous de passer cette fonction

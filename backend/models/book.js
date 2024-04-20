@@ -4,7 +4,7 @@ export const getBooksByUserId = async (userId) => {
   try {
     const result = await pool.query(`
       SELECT livres.id, livres.titre, livres.auteur, livres.date_achat, livres.date_lecture, 
-             livres.commentaire, livres.note, livres.user_id, genres.nom AS genre_nom
+             livres.commentaire, livres.note, livres.user_id,livres.genre_id, genres.nom AS genre_nom
       FROM livres
       LEFT JOIN genres ON livres.genre_id = genres.id
       WHERE livres.user_id = $1

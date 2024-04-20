@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 export interface Book {
   id: string;
@@ -15,6 +16,7 @@ export interface Book {
 export interface ModalProps {
   isOpen: boolean;
   book: Book;
+  genres: Genre[]; // Genres are now passed as a prop
   onSave: (bookData: Book) => void;
   onDelete: (bookId: string) => void;
   closeModal: () => void;
@@ -29,67 +31,56 @@ export interface Genre {
 const ModalLivres: React.FC<ModalProps> = ({
   isOpen,
   book,
+  genres,
   onDelete,
   closeModal,
   onUpdate,
 }) => {
   const [formData, setFormData] = useState<Book>(book);
-  const [genres, setGenres] = useState<Genre[]>([]);
+  const navigate = useNavigate();
   const token = localStorage.getItem("token");
-  console.log("Received onUpdate function:", onUpdate);
 
-  const formatDateForInput = (dateString: string | number | Date) => {
-    console.log(
-      "dateString du formatDateForInput de ModalLivres.tsx",
-      dateString
-    );
-    if (!dateString) return ""; // Retourne une chaîne vide pour une input de type date si aucune date n'est fournie
-    const date = new Date(dateString);
-    return date.toISOString().split("T")[0]; // Assure que la date est au format YYYY-MM-DD
-  };
-  // Mettre à jour formData à l'ouverture de la modal ou lorsque le livre change
   useEffect(() => {
     if (isOpen && book) {
+      console.log("Genre id du livre:", book.genre_id);
+      const genreExists = genres.some((genre) => genre.id === book.genre_id);
+      if (!genreExists) {
+        console.error("Genre ID not found in available genres:", book.genre_id);
+      }
       setFormData({
         ...book,
+        genre_id: genreExists ? book.genre_id : "", // Use empty string if not found
         date_achat: formatDateForInput(book.date_achat),
         date_lecture: formatDateForInput(book.date_lecture),
       });
     }
-  }, [isOpen, book]);
+  }, [isOpen, book, genres]);
 
-  // Gérer les changements d'inputs
+  useEffect(() => {
+    console.log("Updated FormData on Modal Open:", formData);
+    console.log("Updated Available Genres on Modal Open:", genres);
+  }, [formData, genres]);
+
+  const formatDateForInput = (dateString: string | number | Date) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    const timeZoneOffset = date.getTimezoneOffset() * 60000;
+    const localDate = new Date(date.getTime() - timeZoneOffset);
+    return localDate.toISOString().split("T")[0];
+  };
+
   const handleInputChange = (
     event: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
     >
   ) => {
     const { name, value } = event.target;
-    console.log(`Field changed: ${name} - New value: ${value}`); // Diagnostique
-    setFormData((prev) => {
-      const updatedFormData = { ...prev, [name]: value };
-      console.log("Updated formData:", updatedFormData);
-      return updatedFormData;
-    });
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      [name]: value,
+    }));
   };
 
-  // Charger les genres à partir du serveur
-  useEffect(() => {
-    if (token) {
-      fetch("http://localhost:3000/genres", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      })
-        .then((response) => response.json())
-        .then((data) => setGenres(data))
-        .catch(console.error);
-    }
-  }, [token]);
-
-  // Sauvegarder les modifications
   const handleSave = async () => {
     const response = await fetch(`http://localhost:3000/api/${book.id}`, {
       method: "PUT",
@@ -103,8 +94,8 @@ const ModalLivres: React.FC<ModalProps> = ({
     if (response.ok) {
       const updatedBookData = await response.json();
       onUpdate(updatedBookData.livre);
-      console.log("Data sent to server:", formData);
       closeModal();
+      navigate("/books");
     } else {
       console.error("Failed to update the book");
     }
