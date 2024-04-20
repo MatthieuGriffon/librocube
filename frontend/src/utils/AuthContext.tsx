@@ -24,10 +24,8 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
   const login = (token: string, userId: string) => {
     localStorage.setItem("token", token);
     localStorage.setItem("userId", userId);
-    console.log("Stored userId:", localStorage.getItem("userId")); // Vérifiez si l'userId est correctement stocké
     setIsAuthenticated(true);
     setUserId(userId);
-    console.log("Login successful with userID:", userId); // Ajoutez cette ligne pour le débogage
   };
 
   const logout = () => {

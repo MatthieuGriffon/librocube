@@ -44,7 +44,6 @@ const Connexion: React.FC = () => {
         return response.json();
       })
       .then((data) => {
-        console.log("Received data on login:", data);
         if (!data.userId) {
           throw new Error("UserId missing in the response");
         }
@@ -55,7 +54,6 @@ const Connexion: React.FC = () => {
       })
       .catch((error) => {
         console.error("Error:", error);
-        console.log("Erreur lors de l'authentification");
       });
   };
 
@@ -92,7 +90,6 @@ const Connexion: React.FC = () => {
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log("Received data on login:", data);
         if (!data.userId) {
           throw new Error("UserId missing in the response");
         }
@@ -103,7 +100,6 @@ const Connexion: React.FC = () => {
       })
       .catch((error) => {
         console.error("Error:", error);
-        console.log("Erreur lors de l'inscription");
       });
   };
 

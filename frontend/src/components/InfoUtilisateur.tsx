@@ -21,7 +21,6 @@ const InfoUtilisateur: React.FC = () => {
     const fetchUserInfo = () => {
       const token = localStorage.getItem("token");
       if (!token) {
-        console.log("Aucun token trouvé");
         return;
       }
 
@@ -76,7 +75,6 @@ const InfoUtilisateur: React.FC = () => {
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log("Password change response:", data);
         if (data.message) {
           setShowChangePasswordFields(false);
         }
@@ -104,10 +102,9 @@ const InfoUtilisateur: React.FC = () => {
         }
         return response.json(); // Transforme la réponse en JSON
       })
-      .then((data) => {
-        console.log(data.message); // Affiche le message retourné par le serveur
-        logout(); // Déconnecte l'utilisateur
-        navigate("/"); // Redirige vers la page d'accueil
+      .then(() => {
+        logout();
+        navigate("/");
       })
       .catch((error) => {
         console.error("Erreur lors de la suppression du compte:", error);

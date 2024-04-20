@@ -9,18 +9,13 @@ import {
  } from "../models/book.js";
 
 export const fetchUserBooks = async (req, res) => {
-    try {
-        console.log("UserID reçu dans la requête coter :", req.params.userId);
+    try {    
          const userId = req.params.userId;
-         console.log("UserID extrait du token du bookController de la fetchUserBooks:", userId);
          const books = await getBooksByUserId(userId);
-        console.log("Livres récupérés pour l'utilisateur:", books);
          res.json(books);
        
     } catch (error) {
-        console.log("UserID extrait du token:", userId);
         console.error("Erreur lors de la récupération des livres:", error);
-        
          res.status(500).json ({ error : "Erreur lors de la récupération des livres"}) 
     }
 }
@@ -46,19 +41,15 @@ export const updateBook = async (req, res) => {
       // Vérification de l'existence du livre pour cet utilisateur
       const ownershipConfirmed = await checkBookOwnership(bookId, userId);
       if (!ownershipConfirmed) {
-        console.log("Livre non trouvé pour cet utilisateur.");
         return res.status(404).json({ message: "Livre non trouvé pour cet utilisateur." });
         
       }
   
       // Mise à jour du livre si l'utilisateur en est bien le propriétaire
       const updatedBook = await updateBookInDB(bookId, titre, auteur, date_achat, date_lecture, commentaire, note, userId, genre_id);
-      console.log ("updatedBook du BookController", updatedBook);
       if (updatedBook) {
-        console.log("Livre mis à jour avec succès:", updatedBook);
         res.status(200).json({ message: "Livre mis à jour avec succès", livre: updatedBook });
       } else {
-        console.log("Mise à jour non réalisée, vérifiez les données fournies.");
         res.status(404).json({ message: "Mise à jour non réalisée, vérifiez les données fournies." });
       }
     } catch (error) {
@@ -74,10 +65,8 @@ export const deleteBook = async (req, res) => {
     try {
         const ownershipConfirmed = await checkBookOwnership(bookId, userId);
         if (!ownershipConfirmed) {
-            console.log("Livre non trouvé pour cet utilisateur.");
             return res.status(404).json({ message: "Livre non trouvé pour cet utilisateur." });
         }
-
         const deletedCount = await deleteBookFromDB(bookId, userId);
         if(deletedCount > 0) {
             res.status(200).json({ message: "Livre supprimé avec succès"});
@@ -94,8 +83,6 @@ export const deleteBook = async (req, res) => {
 export const getBookDetails = async (req, res) => {
     const bookId = req.params.bookId;  // Assurez-vous que c'est bien récupéré
     const userId = req.userId;
-
-    console.log("Controller: Fetching details for bookId:", bookId, "with userId:", userId);
     try {
         const book = await getBookDetailsById(bookId, userId);
         if (book) {

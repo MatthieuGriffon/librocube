@@ -8,8 +8,6 @@ export const registerUser = async (req, res) => {
     try {
         const newUser = await createUser (username, email, password);
         const token = jwt.sign({ userId: newUser.id }, JWT_SECRET, { expiresIn: '1h' });
-        console.log("Token generated for new user:", token);
-
         res.status(201).json({
             message: "Utilisateur crée avec succès",
             user: newUser,

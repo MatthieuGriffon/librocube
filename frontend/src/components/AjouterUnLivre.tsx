@@ -86,8 +86,6 @@ const AjouterUnLivre: React.FC = () => {
       });
 
       if (response.ok) {
-        const result = await response.json();
-        console.log("Book added successfully", result);
         navigate("/books");
       } else {
         console.error("Failed to add book");

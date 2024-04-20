@@ -42,7 +42,6 @@ const ModalLivres: React.FC<ModalProps> = ({
 
   useEffect(() => {
     if (isOpen && book) {
-      console.log("Genre id du livre:", book.genre_id);
       const genreExists = genres.some((genre) => genre.id === book.genre_id);
       if (!genreExists) {
         console.error("Genre ID not found in available genres:", book.genre_id);
@@ -55,11 +54,6 @@ const ModalLivres: React.FC<ModalProps> = ({
       });
     }
   }, [isOpen, book, genres]);
-
-  useEffect(() => {
-    console.log("Updated FormData on Modal Open:", formData);
-    console.log("Updated Available Genres on Modal Open:", genres);
-  }, [formData, genres]);
 
   const formatDateForInput = (dateString: string | number | Date) => {
     if (!dateString) return "";

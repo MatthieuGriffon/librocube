@@ -38,19 +38,9 @@ const Livres: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
 
-  useEffect(() => {
-    console.log(
-      "Books loaded with genres_id:",
-      livres.map((livre) => livre.genre_id)
-    );
-  }, [livres]);
-
   const openModal = (book: Book) => {
-    console.log("Opening modal with book:", book);
-    console.log("Genre ID of the book:", book.genre_id);
     if (!book.genre_id) {
-      console.error("This book does not have a valid genre ID.");
-      // Afficher une erreur ou prendre une mesure corrective ici
+      alert("Ce livre n'a pas de genre valide.");
       return;
     }
     setSelectedBook(book);
@@ -113,17 +103,13 @@ const Livres: React.FC = () => {
   };
 
   const handleBookUpdate = (updatedBook: { id: string }) => {
-    console.log("Updating book with:", updatedBook);
     const updatedBooks = livres.map((book) => {
       if (book.id === updatedBook.id) {
-        console.log("Old book data:", book);
-        console.log("New book data:", { ...book, ...updatedBook });
         return { ...book, ...updatedBook };
       }
       return book;
     });
     setLivres(updatedBooks);
-    console.log("Updated books list:", updatedBooks);
   };
 
   const onDelete = (bookId: string) => {
@@ -131,10 +117,7 @@ const Livres: React.FC = () => {
     console.log("Deleting book", bookId);
   };
 
-  console.log("Current userId from context:", userId);
-
   const fetchLivres = useCallback(() => {
-    console.log("Fetching books with token:", token, "and userId:", userId);
     if (token && userId) {
       fetch(`http://localhost:3000/api/user/${userId}/books`, {
         method: "GET",
@@ -150,13 +133,11 @@ const Livres: React.FC = () => {
           return response.json();
         })
         .then((data) => {
-          console.log("Books  :", data);
           const booksWithGenre = data.map((book: { genre_id: unknown }) => ({
             ...book,
 
             genre_id: book.genre_id || "fallback-genre-id",
           }));
-          console.log("Books with genre in fetchLivre:", booksWithGenre);
           setLivres(booksWithGenre);
           setLoading(false);
         })
