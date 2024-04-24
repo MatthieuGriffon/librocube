@@ -73,6 +73,13 @@ DB_NAME=myDatabase
 # Secret for JSON Web Tokens
 JWT_SECRET=mySuperSecret
 
+# Sending Email
+EMAIL_HOST= ""
+EMAIL_PORT= ""
+EMAIL_USER= ""
+EMAIL_PASSWORD= ""
+EMAIL_FROM= ""
+
 # Other potential configurations
 PORT=3000
 ```
