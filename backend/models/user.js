@@ -1,14 +1,28 @@
 import { pool } from '../db.js';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
+import { v4 as uuidv4 } from 'uuid';
+
 
 export const createUser = async (username, email, password) => {
-    const hashedPassword = await bcrypt.hash
-    (password, 10);
-    const { rows } = await pool.query (
-        'INSERT INTO utilisateurs(username, email, password_hash) VALUES ($1, $2, $3) RETURNING *',
-        [username, email, hashedPassword]
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const confirmationCode = uuidv4(); 
+
+    const { rows } = await pool.query(
+        'INSERT INTO utilisateurs(username, email, password_hash, confirmation_code, email_verified) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+        [username, email, hashedPassword, confirmationCode, false]
     );
+    return rows[0];
+};
+
+export const verifyUserEmail = async (confirmationCode) => {
+    const query = `
+        UPDATE utilisateurs SET email_verified = true
+        WHERE confirmation_code = $1 AND email_verified = false
+        RETURNING id, username, email;
+    `;
+    const values = [confirmationCode];
+    const { rows } = await pool.query(query, values);
     return rows[0];
 };
 

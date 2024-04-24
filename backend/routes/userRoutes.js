@@ -1,5 +1,5 @@
 import express from 'express';
-import { registerUser, removeUser, updateUserInfo,getUserInfo  } from '../controllers/userController.js';
+import { registerUser, removeUser, updateUserInfo,getUserInfo,confirmEmail  } from '../controllers/userController.js';
 import { loginUser, requestPasswordReset, performPasswordReset, changePassword } from '../controllers/authController.js';
 import { authenticateToken } from '../middleware/authenticateToken.js';
 
@@ -12,6 +12,8 @@ const router = express.Router();
 
 // Route pour l'inscription d'un nouvel utilisateur
 router.post('/register',registerUser);
+
+router.get('/confirm/:confirmationCode',confirmEmail )
 
 // Route pour la connexion d'un utilisateur
 router.post('/login', loginUser);

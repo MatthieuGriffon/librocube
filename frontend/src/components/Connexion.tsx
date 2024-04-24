@@ -1,10 +1,11 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../utils/useAuth";
 
 const Connexion: React.FC = () => {
   const { isAuthenticated, login } = useAuth();
   const navigate = useNavigate();
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -14,14 +15,15 @@ const Connexion: React.FC = () => {
 
   const handleLogin = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setError("");
     const form = event.currentTarget;
     const emailInput = form.querySelector<HTMLInputElement>("#login-email");
     const passwordInput =
       form.querySelector<HTMLInputElement>("#login-password");
 
     if (!emailInput || !passwordInput) {
-      console.error("Les champs du formulaire sont introuvables.");
-      return; // Stop further execution if inputs are not found
+      setError("Les champs du formulaire sont introuvables.");
+      return;
     }
 
     const email = emailInput.value;
@@ -37,23 +39,32 @@ const Connexion: React.FC = () => {
         password: password,
       }),
     })
-      .then((response) => {
+      .then(async (response) => {
+        const data = await response.json(); // Parse JSON response in any case
         if (!response.ok) {
-          throw new Error("Échec de l'authentification");
+          // Check if the specific error is related to user not found or verification needed
+          const errorMessage = data.message || "Échec de l'authentification";
+          if (errorMessage === "User not found") {
+            setError("Cet utilisateur n'existe pas. Veuillez vous inscrire.");
+          } else if (errorMessage.includes("verify your email")) {
+            setError("Veuillez vérifier votre adresse email.");
+          } else if (errorMessage.includes("Incorrect password")) {
+            setError("Mot de passe incorrect.");
+          } else {
+            setError(errorMessage);
+          }
+          throw new Error(errorMessage);
         }
-        return response.json();
+        return data;
       })
       .then((data) => {
-        if (!data.userId) {
-          throw new Error("UserId missing in the response");
-        }
         localStorage.setItem("token", data.token);
         localStorage.setItem("userId", data.userId);
         login(data.token, data.userId);
         navigate("/books");
       })
       .catch((error) => {
-        console.error("Error:", error);
+        console.error("Login Error:", error.message);
       });
   };
 
@@ -90,11 +101,13 @@ const Connexion: React.FC = () => {
     })
       .then((response) => response.json())
       .then((data) => {
+        console.log("User registered successfully", data.userId, data.token);
         if (!data.userId) {
           throw new Error("UserId missing in the response");
         }
         localStorage.setItem("token", data.token);
         localStorage.setItem("userId", data.userId);
+
         login(data.token, data.userId);
         navigate("/books");
       })
@@ -105,6 +118,15 @@ const Connexion: React.FC = () => {
 
   return (
     <div className="space-y-8 p-2 max-w-md mx-auto bg-white rounded-lg shadow-md">
+      {error && (
+        <div
+          className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
+          role="alert"
+        >
+          <strong className="font-bold">Erreur !</strong>
+          <span className="block sm:inline">{error}</span>
+        </div>
+      )}
       <div>
         <h2 className="text-sm font-bold text-center">Connexion</h2>
         <form onSubmit={handleLogin} className="space-y-2">

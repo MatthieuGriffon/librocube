@@ -10,7 +10,11 @@ export const loginUser = async (req, res) => {
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
-
+        console.log("user_email_verfied du composant authController",user.email_verified);
+        if (!user.email_verified) {
+            return res.status(403).json({ message: "Please verify your email address to log in." });
+        }
+        console.log(user);
         const isMatch = await bcrypt.compare(password, user.password_hash);
 
         if (!isMatch) {
@@ -22,7 +26,8 @@ export const loginUser = async (req, res) => {
         res.json({
             message: "Authentication successful",
             token,
-            userId: user.id
+            userId: user.id,
+            email_verified: user.email_verified
         });
     } catch (error) {
         console.error("Login Error:", error);

@@ -1,6 +1,9 @@
-import { createUser, deleteUser, updateUser, findUserById  } from "../models/user.js";
+import { createUser, deleteUser, updateUser, findUserById,verifyUserEmail  } from "../models/user.js";
 import jwt from "jsonwebtoken";
+import sendEmail from "../utils/emailService.js";
+
 const JWT_SECRET = process.env.JWT_SECRET;
+
 
 export const registerUser = async (req, res) => {
     const { username, email, password } = req.body;
@@ -8,8 +11,19 @@ export const registerUser = async (req, res) => {
     try {
         const newUser = await createUser (username, email, password);
         const token = jwt.sign({ userId: newUser.id }, JWT_SECRET, { expiresIn: '1h' });
+
+        // Envoyer l'email de confirmation
+        const emailContent = `
+            <h1>Confirmation de votre compte</h1>
+            <p>Merci de vous être inscrit. Veuillez confirmer votre email en cliquant sur le lien ci-dessous:</p>
+            <a href="http://localhost:3000/users/confirm/${newUser.confirmation_code}">Confirmer l'email</a>
+        `;
+        sendEmail(email, "Confirmation de votre compte", emailContent);
+
+
         res.status(201).json({
-            message: "Utilisateur crée avec succès",
+            userId: newUser.id,
+            message: "Utilisateur créé avec succès, veuillez confirmer votre email.",
             user: newUser,
             token,
         });
@@ -22,6 +36,21 @@ export const registerUser = async (req, res) => {
         });
     }
 }
+
+export const confirmEmail = async (req, res) => {
+    const { confirmationCode } = req.params;
+    try {
+        const user = await verifyUserEmail(confirmationCode);
+        if (user) {
+            res.json({ message: "Email vérifié avec succès.", user });
+        } else {
+            res.status(404).json({ message: "Code de confirmation invalide ou déjà utilisé." });
+        }
+    } catch (error) {
+        console.error("Error during email confirmation:", error);
+        res.status(500).json({ message: "Erreur lors de la confirmation de l'email", error: error.toString() });
+    }
+};
 
 export const getUserInfo = async (req, res) => {
     try {
