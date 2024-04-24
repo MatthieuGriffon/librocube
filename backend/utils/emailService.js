@@ -1,18 +1,19 @@
 import nodemailer from 'nodemailer';
+import dotenv from 'dotenv';
 
 const transporter = nodemailer.createTransport({
-    host: 'smtp.ionos.fr', 
-    port: 465,              
+    host: process.env.EMAIL_HOST, 
+    port: process.env.EMAIL_PORT,              
     secure: true,      
     auth: {
-        user: 'postmaster@matthieu-griffon.fr',
-        pass: '44Xstd6f-@'
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASSWORD
     }
 });
 
 const sendEmail = (to, subject, htmlContent) => {
     const mailOptions = {
-        from: 'postmaster@matthieu-griffon.fr',
+        from: process.env.EMAIL_FROM,
         to,
         subject,
         html: htmlContent
