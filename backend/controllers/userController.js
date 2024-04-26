@@ -1,4 +1,4 @@
-import { createUser, deleteUser, updateUser, findUserById,verifyUserEmail  } from "../models/user.js";
+import { createUser, deleteUser, updateUser, findUserById,verifyUserEmail, findUserByConfirmationCode  } from "../models/user.js";
 import jwt from "jsonwebtoken";
 import sendEmail from "../utils/emailService.js";
 
@@ -16,7 +16,7 @@ export const registerUser = async (req, res) => {
         const emailContent = `
             <h1>Confirmation de votre compte</h1>
             <p>Merci de vous être inscrit. Veuillez confirmer votre email en cliquant sur le lien ci-dessous:</p>
-            <a href="http://localhost:3000/users/confirm/${newUser.confirmation_code}">Confirmer l'email</a>
+            <a href="http://localhost:8173/confirm/${newUser.confirmation_code}">Confirmer l'email</a>
         `;
         sendEmail(email, "Confirmation de votre compte", emailContent);
 
@@ -41,11 +41,16 @@ export const confirmEmail = async (req, res) => {
     const { confirmationCode } = req.params;
     try {
         const user = await verifyUserEmail(confirmationCode);
-        if (user) {
-            res.json({ message: "Email vérifié avec succès.", user });
-        } else {
-            res.status(404).json({ message: "Code de confirmation invalide ou déjà utilisé." });
+        if (!user) {
+            const alreadyVerifiedUser = await findUserByConfirmationCode(confirmationCode);
+            if (alreadyVerifiedUser && alreadyVerifiedUser.email_verified) {
+                return res.status(200).json({ message: "Email déjà vérifié.", user: alreadyVerifiedUser });
+            }
+            console.log("Confirmation code invalid or already used:", confirmationCode);
+            return res.status(404).json({ message: "Code de confirmation invalide ou déjà utilisé." });
         }
+        console.log("Email verified successfully:", user);
+        res.json({ message: "Email vérifié avec succès.", user });
     } catch (error) {
         console.error("Error during email confirmation:", error);
         res.status(500).json({ message: "Erreur lors de la confirmation de l'email", error: error.toString() });

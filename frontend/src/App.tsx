@@ -7,6 +7,7 @@ import Livres from "./components/Livres";
 import AjouterUnLivre from "./components/AjouterUnLivre";
 import Connexion from "./components/Connexion";
 import InfoUtilisateur from "./components/InfoUtilisateur";
+import ConfirmEmail from "./components/ConfirmEmail";
 import { AuthProvider } from "./utils/AuthContext";
 
 const App: React.FC = () => {
@@ -24,6 +25,10 @@ const App: React.FC = () => {
               <Route path="/add-book" element={<AjouterUnLivre />} />
               <Route path="/login" element={<Connexion />} />
               <Route path="/info-utilisateur" element={<InfoUtilisateur />} />
+              <Route
+                path="/confirm/:confirmationCode"
+                element={<ConfirmEmail />}
+              />
             </Routes>
           </main>
         </div>

@@ -6,6 +6,7 @@ const Connexion: React.FC = () => {
   const { isAuthenticated, login } = useAuth();
   const navigate = useNavigate();
   const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -15,7 +16,7 @@ const Connexion: React.FC = () => {
 
   const handleLogin = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setError("");
+    setError(""); // Réinitialiser l'erreur précédente
     const form = event.currentTarget;
     const emailInput = form.querySelector<HTMLInputElement>("#login-email");
     const passwordInput =
@@ -28,6 +29,7 @@ const Connexion: React.FC = () => {
 
     const email = emailInput.value;
     const password = passwordInput.value;
+    console.log("Attempting login with:", email, password); // Log 1
 
     fetch("http://localhost:3000/users/login", {
       method: "POST",
@@ -40,36 +42,35 @@ const Connexion: React.FC = () => {
       }),
     })
       .then(async (response) => {
-        const data = await response.json(); // Parse JSON response in any case
+        const data = await response.json();
+        console.log("Server response:", data); // Log 2
         if (!response.ok) {
-          // Check if the specific error is related to user not found or verification needed
-          const errorMessage = data.message || "Échec de l'authentification";
-          if (errorMessage === "User not found") {
-            setError("Cet utilisateur n'existe pas. Veuillez vous inscrire.");
-          } else if (errorMessage.includes("verify your email")) {
-            setError("Veuillez vérifier votre adresse email.");
-          } else if (errorMessage.includes("Incorrect password")) {
-            setError("Mot de passe incorrect.");
-          } else {
-            setError(errorMessage);
-          }
-          throw new Error(errorMessage);
+          throw new Error(data.message || "Échec de l'authentification");
         }
         return data;
       })
       .then((data) => {
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("userId", data.userId);
-        login(data.token, data.userId);
-        navigate("/books");
+        if (data.email_verified) {
+          login(data.token, data.userId, true);
+          navigate("/books");
+        } else {
+          setError(
+            "Veuillez vérifier votre adresse email avant de vous connecter."
+          );
+          console.log("Login failed: email not verified"); // Log 3
+        }
       })
       .catch((error) => {
         console.error("Login Error:", error.message);
+        setError(error.message);
+        console.log("Login process error:", error.message); // Log 4
       });
   };
 
   const handleSignup = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setError("");
+    setMessage("{error}");
     const form = event.currentTarget;
     const usernameInput =
       form.querySelector<HTMLInputElement>("#signup-username");
@@ -78,7 +79,7 @@ const Connexion: React.FC = () => {
       form.querySelector<HTMLInputElement>("#signup-password");
 
     if (!usernameInput || !emailInput || !passwordInput) {
-      console.error(
+      setError(
         "Un ou plusieurs champs du formulaire d'inscription sont introuvables."
       );
       return;
@@ -87,37 +88,42 @@ const Connexion: React.FC = () => {
     const username = usernameInput.value;
     const email = emailInput.value;
     const password = passwordInput.value;
+    console.log("Attempting signup with:", username, email); // Log 1
 
     fetch("http://localhost:3000/users/register", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        username: username,
-        email: email,
-        password: password,
-      }),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, email, password }),
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log("User registered successfully", data.userId, data.token);
-        if (!data.userId) {
-          throw new Error("UserId missing in the response");
+        if (data.error) {
+          console.log("Signup response data:", data); // Log 2
+          setError(data.message);
+          throw new Error(data.message);
         }
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("userId", data.userId);
-
-        login(data.token, data.userId);
-        navigate("/books");
+        setMessage(
+          "Inscription réussie. Veuillez vérifier votre email pour activer votre compte."
+        );
       })
       .catch((error) => {
-        console.error("Error:", error);
+        setError(error.toString());
+        console.error("Signup Error:", error);
+        console.log("Signup process error:", error.toString()); // Log 3
       });
   };
 
   return (
     <div className="space-y-8 p-2 max-w-md mx-auto bg-white rounded-lg shadow-md">
+      {message && (
+        <div
+          className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative"
+          role="alert"
+        >
+          <strong className="font-bold">Succès !</strong>
+          <span className="block sm:inline">{message}</span>
+        </div>
+      )}
       {error && (
         <div
           className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"

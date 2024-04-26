@@ -17,13 +17,17 @@ export const createUser = async (username, email, password) => {
 
 export const verifyUserEmail = async (confirmationCode) => {
     const query = `
-        UPDATE utilisateurs SET email_verified = true
+        UPDATE utilisateurs
+        SET email_verified = true
         WHERE confirmation_code = $1 AND email_verified = false
         RETURNING id, username, email;
     `;
     const values = [confirmationCode];
     const { rows } = await pool.query(query, values);
-    return rows[0];
+    if (rows.length === 0) {
+        return null; // Aucune mise à jour n'a été effectuée, peut-être parce que le code était déjà utilisé
+    }
+    return rows[0]; // Retourne l'utilisateur mis à jour
 };
 
 export const deleteUser= async (id) => {
@@ -97,4 +101,13 @@ export const updateUserPassword = async (userId, newPasswordHash) => {
         console.error("Error updating user password:", error);
         throw error;
     }
+};
+
+export const findUserByConfirmationCode = async (confirmationCode) => {
+    const query = `
+        SELECT * FROM utilisateurs
+        WHERE confirmation_code = $1;
+    `;
+    const { rows } = await pool.query(query, [confirmationCode]);
+    return rows[0]; // retourne le premier utilisateur ou undefined
 };

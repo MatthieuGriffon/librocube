@@ -8,17 +8,17 @@ export const loginUser = async (req, res) => {
     try {
         const user = await findUserByEmail(email);
         if (!user) {
-            return res.status(404).json({ message: "User not found" });
+            return res.status(404).json({ message: "Cet utilisateur n'existe pas!Veuillez vous enregistré." });
         }
         console.log("user_email_verfied du composant authController",user.email_verified);
         if (!user.email_verified) {
-            return res.status(403).json({ message: "Please verify your email address to log in." });
+            return res.status(403).json({ message: "Veuillez vérifier votre adresse email avant de vous connecter." });
         }
         console.log(user);
         const isMatch = await bcrypt.compare(password, user.password_hash);
 
         if (!isMatch) {
-            return res.status(401).json({ message: "Incorrect password" });
+            return res.status(401).json({ message: "Mot de passe incorect!" });
         }
 
         const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: "1h" });

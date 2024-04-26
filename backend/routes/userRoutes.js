@@ -13,6 +13,7 @@ const router = express.Router();
 // Route pour l'inscription d'un nouvel utilisateur
 router.post('/register',registerUser);
 
+// Route pour la confirmation de l'email
 router.get('/confirm/:confirmationCode',confirmEmail )
 
 // Route pour la connexion d'un utilisateur
